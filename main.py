@@ -5,11 +5,14 @@ from agent import Agent, AgentType
 def main():
     WIDTH, HEIGHT = 600, 600
     BLOCK_SIZE = 30
-    FPS = 30
+    FPS = 60
 
     agent = Agent(AgentType.AI, WIDTH, HEIGHT, BLOCK_SIZE)
-    snake_game = SnakeGame(WIDTH, HEIGHT, BLOCK_SIZE, FPS, agent)
-    snake_game.run()
+    snake_game = SnakeGame(WIDTH, HEIGHT, BLOCK_SIZE,
+                           FPS, agent, graphics=False)
+    final_score, time_passed = snake_game.run()
+
+    print("Final score: ", final_score, "Time passed: ", time_passed)
 
 
 if __name__ == "__main__":

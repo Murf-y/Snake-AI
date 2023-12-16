@@ -8,12 +8,13 @@ from agent import AgentType
 
 
 class SnakeGame:
-    def __init__(self, width, height, block_size, tick_rate, agent):
+    def __init__(self, width, height, block_size, tick_rate, agent, graphics=True):
         self.width = width
         self.height = height
         self.block_size = block_size
         self.tick_rate = tick_rate
         self.agent = agent
+        self.graphics = graphics
         self.snake = Snake(block_size, width, height)
 
         self.grid = np.zeros(
@@ -31,10 +32,12 @@ class SnakeGame:
         self.GRID_COLOR = (43, 43, 43)
         self.FOOD_COLOR = (212, 58, 47)
         self.BACKGROUND_COLOR = (31, 31, 31)
-        pygame.init()
-        self.font = pygame.font.SysFont("segoeui", 24)
-        self.screen = pygame.display.set_mode((width, height))
-        self.clock = pygame.time.Clock()
+
+        if self.graphics:
+            pygame.init()
+            self.font = pygame.font.SysFont("segoeui", 24)
+            self.screen = pygame.display.set_mode((width, height))
+            self.clock = pygame.time.Clock()
 
     def generate_food(self):
         possible_food = []
@@ -102,8 +105,12 @@ class SnakeGame:
                 sys.exit()
 
     def run(self):
+
+        start_time = time.time()
+
         while True:
-            self.draw()
+            if self.graphics:
+                self.draw()
 
             self.agent.update(self.snake.snake, self.food,
                               self.snake.get_direction(), self.snake.get_score())
@@ -115,11 +122,18 @@ class SnakeGame:
                 self.eat()
 
             if self.will_collide_after_move():
-                pygame.quit()
-                sys.exit()
+
+                if self.graphics:
+                    pygame.quit()
+                break
 
             self.move()
 
-            self.handle_close()
-            self.clock.tick(self.tick_rate)
-            time.sleep(1 / self.tick_rate)
+            if self.graphics:
+                self.handle_close()
+                self.clock.tick(self.tick_rate)
+                time.sleep(1 / self.tick_rate)
+
+        end_time = time.time()
+        time_passed = end_time - start_time
+        return self.snake.get_score(), time_passed

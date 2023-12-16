@@ -119,7 +119,7 @@ class Agent:
         angle_to_food = math.atan2(
             self.food[1] - new_head[1], self.food[0] - new_head[0])
 
-        return 1 / (distance_to_food + 1) + 1 / (distance_to_wall + 1) + 1 / (distance_to_self + 1) + angle_to_food
+        return 1 / (distance_to_food + 1)
 
     def ai_action(self):
         best_action = Action.NONE
@@ -133,5 +133,4 @@ class Agent:
                 best_fitness = fitness
                 best_action = action
 
-        print(best_action, best_fitness)
         return best_action
