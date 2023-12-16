@@ -26,8 +26,8 @@ class SnakeGame:
         self.clock = pygame.time.Clock()
 
     def generate_food(self):
-        food = [random.randrange(0, self.width, self.block_size), random.randrange(
-            0, self.height, self.block_size)]
+        food = [random.randrange(self.block_size, self.width, self.block_size), random.randrange(
+            self.block_size, self.height, self.block_size)]
 
         while True:
             for i in self.snake.snake:
@@ -61,7 +61,7 @@ class SnakeGame:
 
         pygame.display.flip()
 
-    def collision(self):
+    def will_collide_after_move(self):
         return self.snake.collision()
 
     def can_eat(self):
@@ -108,7 +108,7 @@ class SnakeGame:
             if self.can_eat():
                 self.eat()
 
-            if self.collision():
+            if self.will_collide_after_move():
                 pygame.quit()
                 sys.exit()
 
@@ -116,4 +116,4 @@ class SnakeGame:
 
             self.handle_close()
             self.clock.tick(self.tick_rate)
-            time.sleep(self.tick_rate * 0.065 / 60)
+            time.sleep(1 / self.tick_rate)

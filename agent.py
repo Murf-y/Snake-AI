@@ -39,8 +39,6 @@ class Agent:
     def act(self):
         action = self.act_helper()
         direction = self.get_direction_from_action(action)
-        print(
-            f"Action: {action}, Direction: {direction}, Score: {self.current_score}")
         return direction
 
     def get_direction_from_action(self, action):
@@ -83,19 +81,28 @@ class Agent:
 
     def fitness_function(self, direction):
 
+        # Unallowed action
         if np.array_equal(direction, -self.current_direction):
             return -100
 
+        # The head of the snake after the action is taken
         new_head = self.snake_parts[-1] + direction
+
+        # Hit wall
         if new_head[0] < 0 or new_head[0] >= self.width or new_head[1] < 0 or new_head[1] >= self.height:
             return -100
-        elif any((new_head == segment).all() for segment in self.snake_parts[:-1]):
+
+        # Hit self
+        if any((new_head == segment).all() for segment in self.snake_parts[:-1]):
             return -100
 
-        elif new_head[0] == self.food[0] and new_head[1] == self.food[1]:
+        # Hit food
+        if new_head[0] == self.food[0] and new_head[1] == self.food[1]:
             return 100
-        else:
-            return 0
+
+        # Euclidean distance to food
+        distance_to_food = np.linalg.norm(new_head - self.food)
+        return 1 / distance_to_food
 
     def ai_action(self):
         best_action = Action.NONE

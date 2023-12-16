@@ -19,13 +19,18 @@ class Snake:
         return self.direction
 
     def collision(self):
-        new_head = self.snake[-1] + self.direction
-        if new_head[0] < 0 or new_head[0] >= self.width or new_head[1] < 0 or new_head[1] >= self.height:
+        head = self.snake[-1]
+
+        # Hit wall
+        if head[0] < 0 or head[0] >= self.width or head[1] < 0 or head[1] >= self.height:
             return True
-        elif any((new_head == segment).all() for segment in self.snake[:-1]):
-            return True
-        else:
-            return False
+
+        # Hit self
+        for segment in self.snake[:-1]:
+            if np.array_equal(segment, head):
+                return True
+
+        return False
 
     def move(self):
         new_head = self.snake[-1] + self.direction
@@ -40,6 +45,8 @@ class Snake:
         return (self.snake[-1] + self.direction == food).all()
 
     def change_direction(self, direction):
+
+        # Change direction only if it is allowed
         if not np.array_equal(self.direction, -direction):
             self.direction = direction
 
