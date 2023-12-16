@@ -114,4 +114,4 @@ class SnakeGame:
 
             self.handle_close()
             self.clock.tick(self.tick_rate)
-            time.sleep(self.tick_rate * 0.1 / 60)
+            time.sleep(self.tick_rate * 0.065 / 60)
