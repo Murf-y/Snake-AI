@@ -86,3 +86,16 @@ class Agent:
             return 100
         else:
             return 0
+
+    def ai_action(self):
+        best_action = Action.NONE
+        best_fitness = -100
+
+        for action in list(Action):
+            fitness = self.fitness_function(self.get_direction_from_action(
+                action, self.snake_parts[-1] - self.snake_parts[-2]))
+            if fitness > best_fitness:
+                best_fitness = fitness
+                best_action = action
+
+        return best_action
