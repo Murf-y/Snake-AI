@@ -15,6 +15,17 @@ class SnakeGame:
         self.tick_rate = tick_rate
         self.agent = agent
         self.snake = Snake(block_size, width, height)
+
+        self.grid = np.zeros(
+            (self.width // self.block_size, self.height // self.block_size))
+
+        for i in range(0, self.width, self.block_size):
+            for j in range(0, self.height, self.block_size):
+                if i == 0 or i == self.width - self.block_size or j == 0 or j == self.height - self.block_size:
+                    self.grid[i // self.block_size][j // self.block_size] = 0
+                else:
+                    self.grid[i // self.block_size][j // self.block_size] = 1
+
         self.food = self.generate_food()
         self.SNAKE_COLOR = (135, 212, 47)
         self.GRID_COLOR = (43, 43, 43)
@@ -26,19 +37,14 @@ class SnakeGame:
         self.clock = pygame.time.Clock()
 
     def generate_food(self):
-        food = [random.randrange(self.block_size, self.width, self.block_size), random.randrange(
-            self.block_size, self.height, self.block_size)]
+        possible_food = []
+        for i in range(self.width // self.block_size):
+            for j in range(self.height // self.block_size):
+                if self.grid[i][j] == 1:
+                    possible_food.append(
+                        (i * self.block_size, j * self.block_size))
 
-        while True:
-            for i in self.snake.snake:
-                if i[0] == food[0] and i[1] == food[1]:
-                    food = [random.randrange(0, self.width, self.block_size), random.randrange(
-                        0, self.height, self.block_size)]
-                    break
-            else:
-                break
-
-        return food
+        return random.choice(possible_food)
 
     def draw(self):
         self.screen.fill(self.BACKGROUND_COLOR)

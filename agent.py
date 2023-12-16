@@ -1,6 +1,7 @@
 from enum import Enum
 import pygame
 import random
+import math
 import numpy as np
 
 
@@ -106,7 +107,7 @@ class Agent:
 
     def ai_action(self):
         best_action = Action.NONE
-        best_fitness = -100
+        best_fitness = -math.inf
 
         for action in list(Action):
             direction = self.get_direction_from_action(action)
@@ -116,4 +117,5 @@ class Agent:
                 best_fitness = fitness
                 best_action = action
 
+        print(best_action, best_fitness)
         return best_action
