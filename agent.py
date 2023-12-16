@@ -82,28 +82,44 @@ class Agent:
 
     def fitness_function(self, direction):
 
+        death_penalty = -100
+
         # Unallowed action
         if np.array_equal(direction, -self.current_direction):
-            return -100
+            return death_penalty
 
         # The head of the snake after the action is taken
         new_head = self.snake_parts[-1] + direction
 
         # Hit wall
         if new_head[0] < 0 or new_head[0] >= self.width or new_head[1] < 0 or new_head[1] >= self.height:
-            return -100
+            return death_penalty
 
         # Hit self
         if any((new_head == segment).all() for segment in self.snake_parts[:-1]):
-            return -100
+            return death_penalty
 
         # Hit food
         if new_head[0] == self.food[0] and new_head[1] == self.food[1]:
-            return 100
+            return 1
 
-        # Euclidean distance to food
-        distance_to_food = np.linalg.norm(new_head - self.food)
-        return 1 / distance_to_food
+        # Calculate distance to food using manhattan distance
+        distance_to_food = abs(
+            new_head[0] - self.food[0]) + abs(new_head[1] - self.food[1])
+
+        # Calculate distance to wall using manhattan distance
+        distance_to_wall = min(
+            new_head[0], self.width - new_head[0], new_head[1], self.height - new_head[1])
+
+        # Calculate distance to self using manhattan distance
+        distance_to_self = min([abs(new_head[0] - segment[0]) + abs(
+            new_head[1] - segment[1]) for segment in self.snake_parts[:-1]]) if len(self.snake_parts) > 1 else 0
+
+        # Calculate angle to food
+        angle_to_food = math.atan2(
+            self.food[1] - new_head[1], self.food[0] - new_head[0])
+
+        return 1 / (distance_to_food + 1) + 1 / (distance_to_wall + 1) + 1 / (distance_to_self + 1) + angle_to_food
 
     def ai_action(self):
         best_action = Action.NONE
