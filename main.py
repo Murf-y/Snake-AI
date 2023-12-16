@@ -3,16 +3,16 @@ import numpy as np
 import sys
 import time
 import random
+from snake import Snake
 
-
-def collision(snake, direction, width, height):
-    new_head = snake[-1] + direction
-    if new_head[0] < 0 or new_head[0] >= width or new_head[1] < 0 or new_head[1] >= height:
-        return True
-    elif any((new_head == segment).all() for segment in snake[:-1]):
-        return True
-    else:
-        return False
+# def collision(snake, direction, width, height):
+#     new_head = snake[-1] + direction
+#     if new_head[0] < 0 or new_head[0] >= width or new_head[1] < 0 or new_head[1] >= height:
+#         return True
+#     elif any((new_head == segment).all() for segment in snake[:-1]):
+#         return True
+#     else:
+#         return False
 
 
 def generate_food(snake, width, height, BLOCK_SIZE):
@@ -24,31 +24,28 @@ def main():
     SNAKE_COLOR = (135, 212, 47)
     GRID_COLOR = (43, 43, 43)
     FOOD_COLOR = (212, 58, 47)
+    BACKGROUND_COLOR = (31, 31, 31)
     WIDTH, HEIGHT = 600, 600
     BLOCK_SIZE = 30
-    SNAKE_START = [(WIDTH // 2, HEIGHT // 2)]
     
     
     
     pygame.init()
     screen = pygame.display.set_mode((WIDTH, HEIGHT))
     clock = pygame.time.Clock()
-    snake = SNAKE_START.copy()
-    direction = np.array([0, -BLOCK_SIZE])
+    snake = Snake(BLOCK_SIZE, WIDTH, HEIGHT)
     food = generate_food(snake, WIDTH, HEIGHT, BLOCK_SIZE)
 
     while True:
-        screen.fill((31, 31, 31))
+        screen.fill(BACKGROUND_COLOR)
 
         # Draw grid with fading alpha
         for i in range(0, WIDTH, BLOCK_SIZE):
             for j in range(0, HEIGHT, BLOCK_SIZE):
                 pygame.draw.rect(screen, GRID_COLOR + (50,), pygame.Rect(i, j, BLOCK_SIZE, BLOCK_SIZE), 1)
 
-        # Draw snake
-        for segment in snake:
-            pygame.draw.rect(screen, SNAKE_COLOR, pygame.Rect(segment[0], segment[1], BLOCK_SIZE, BLOCK_SIZE))
-
+        snake.draw(screen)
+        
         # Draw food
         pygame.draw.rect(screen, FOOD_COLOR, pygame.Rect(food[0], food[1], BLOCK_SIZE, BLOCK_SIZE))
         
@@ -57,17 +54,14 @@ def main():
         # Move snake
         new_head = snake[-1] + direction
         
-        # Check for collision
-        if collision(snake, direction, WIDTH, HEIGHT):
+        if snake.collision():
             pygame.quit()
             sys.exit()
-        else:
-            snake.append(new_head)
-        
-        if (new_head == food).all():
+        elif (new_head == food).all():
+            snake.eat(food)
             food = generate_food(snake, WIDTH, HEIGHT, BLOCK_SIZE)
         else:
-            snake.pop(0)
+            snake.move()
             
 
         # Handle events
