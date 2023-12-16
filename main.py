@@ -7,7 +7,7 @@ def main():
     BLOCK_SIZE = 30
     FPS = 60
 
-    agent = Agent(AgentType.HUMAN, WIDTH, HEIGHT, BLOCK_SIZE)
+    agent = Agent(AgentType.AI, WIDTH, HEIGHT, BLOCK_SIZE)
     snake_game = SnakeGame(WIDTH, HEIGHT, BLOCK_SIZE, FPS, agent)
     snake_game.run()
 

@@ -27,18 +27,23 @@ class Agent:
 
         self.snake_parts = []
         self.food = None
+        self.current_direction = None
+        self.current_score = 0
 
-    def update(self, snake_parts, food):
+    def update(self, snake_parts, food, current_direction, current_score):
         self.snake_parts = snake_parts
         self.food = food
+        self.current_direction = current_direction
+        self.current_score = current_score
 
-    def act(self, current_direction):
+    def act(self):
         action = self.act_helper()
-        direction = self.get_direction_from_action(action, current_direction)
-        print(self.fitness_function(direction))
+        direction = self.get_direction_from_action(action)
+        print(
+            f"Action: {action}, Direction: {direction}, Score: {self.current_score}")
         return direction
 
-    def get_direction_from_action(self, action, current_direction):
+    def get_direction_from_action(self, action):
         if action == Action.UP:
             return np.array([0, -self.block_size])
         elif action == Action.DOWN:
@@ -48,15 +53,16 @@ class Agent:
         elif action == Action.RIGHT:
             return np.array([self.block_size, 0])
         else:
-            return current_direction
+            return self.current_direction
 
     def act_helper(self):
         if self.agent_type == AgentType.HUMAN:
             return self.handle_events()
-        elif self.agent_type == AgentType.RANDOM:
+
+        if self.agent_type == AgentType.RANDOM:
             return self.random_action()
-        else:
-            return self.ai_action()
+
+        return self.ai_action()
 
     def random_action(self):
         return random.choice(list(Action))
@@ -76,6 +82,10 @@ class Agent:
         return Action.NONE
 
     def fitness_function(self, direction):
+
+        if np.array_equal(direction, -self.current_direction):
+            return -100
+
         new_head = self.snake_parts[-1] + direction
         if new_head[0] < 0 or new_head[0] >= self.width or new_head[1] < 0 or new_head[1] >= self.height:
             return -100
@@ -92,8 +102,9 @@ class Agent:
         best_fitness = -100
 
         for action in list(Action):
-            fitness = self.fitness_function(self.get_direction_from_action(
-                action, self.snake_parts[-1] - self.snake_parts[-2]))
+            direction = self.get_direction_from_action(action)
+            fitness = self.fitness_function(direction)
+
             if fitness > best_fitness:
                 best_fitness = fitness
                 best_action = action

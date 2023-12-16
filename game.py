@@ -99,8 +99,10 @@ class SnakeGame:
         while True:
             self.draw()
 
-            self.agent.update(self.snake.snake, self.food)
-            direction = self.agent.act(self.snake.get_direction())
+            self.agent.update(self.snake.snake, self.food,
+                              self.snake.get_direction(), self.snake.get_score())
+
+            direction = self.agent.act()
             self.change_direction(direction)
 
             if self.can_eat():
