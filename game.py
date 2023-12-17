@@ -110,8 +110,7 @@ class SnakeGame:
             if self.graphics:
                 self.draw()
 
-            self.agent.update(self.snake.snake, self.food,
-                              self.snake.get_direction(), self.snake.get_score())
+            self.agent.update(self.snake, self.food)
 
             direction = self.agent.act()
             self.change_direction(direction)

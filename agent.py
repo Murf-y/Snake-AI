@@ -31,11 +31,11 @@ class Agent:
         self.current_direction = None
         self.current_score = 0
 
-    def update(self, snake_parts, food, current_direction, current_score):
-        self.snake_parts = snake_parts
+    def update(self, snake, food):
+        self.snake_parts = snake.snake
+        self.current_direction = snake.get_direction()
+        self.current_score = snake.get_score()
         self.food = food
-        self.current_direction = current_direction
-        self.current_score = current_score
 
     def act(self):
         action = self.act_helper()
