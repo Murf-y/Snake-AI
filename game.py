@@ -22,10 +22,7 @@ class SnakeGame:
 
         for i in range(0, self.width, self.block_size):
             for j in range(0, self.height, self.block_size):
-                if i == 0 or i == self.width - self.block_size or j == 0 or j == self.height - self.block_size:
-                    self.grid[i // self.block_size][j // self.block_size] = 0
-                else:
-                    self.grid[i // self.block_size][j // self.block_size] = 1
+                self.grid[i // self.block_size][j // self.block_size] = 1
 
         self.food = self.generate_food()
         self.SNAKE_COLOR = (135, 212, 47)
@@ -44,8 +41,9 @@ class SnakeGame:
         for i in range(self.width // self.block_size):
             for j in range(self.height // self.block_size):
                 if self.grid[i][j] == 1:
-                    possible_food.append(
-                        (i * self.block_size, j * self.block_size))
+                    if not any(np.array_equal(segment, [i * self.block_size, j * self.block_size]) for segment in self.snake.snake):
+                        possible_food.append(
+                            (i * self.block_size, j * self.block_size))
 
         return random.choice(possible_food)
 

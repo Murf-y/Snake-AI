@@ -38,7 +38,7 @@ class Snake:
         self.snake.pop(0)
 
     def eat(self, food):
-        self.snake.append(food)
+        self.snake.insert(0, food)
         self.score += 1
 
     def can_eat(self, food):

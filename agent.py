@@ -82,7 +82,7 @@ class Agent:
 
     def fitness_function(self, direction):
 
-        death_penalty = -100
+        death_penalty = math.inf
 
         # Unallowed action
         if np.array_equal(direction, -self.current_direction):
@@ -96,7 +96,7 @@ class Agent:
             return death_penalty
 
         # Hit self
-        if any((new_head == segment).all() for segment in self.snake_parts[:-1]):
+        if any((new_head == segment).all() for segment in self.snake_parts):
             return death_penalty
 
         # Hit food
@@ -119,17 +119,17 @@ class Agent:
         angle_to_food = math.atan2(
             self.food[1] - new_head[1], self.food[0] - new_head[0])
 
-        return 1 / (distance_to_food + 1)
+        return distance_to_food
 
     def ai_action(self):
         best_action = Action.NONE
-        best_fitness = -math.inf
+        best_fitness = math.inf
 
         for action in list(Action):
             direction = self.get_direction_from_action(action)
             fitness = self.fitness_function(direction)
 
-            if fitness > best_fitness:
+            if fitness <= best_fitness:
                 best_fitness = fitness
                 best_action = action
 
