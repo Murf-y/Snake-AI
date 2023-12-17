@@ -3,6 +3,7 @@ import pygame
 import random
 import math
 import numpy as np
+from snake import Snake
 
 
 class AgentType(Enum):
@@ -26,13 +27,13 @@ class Agent:
         self.height = height
         self.block_size = block_size
 
-        self.snake_parts = []
+        self.snake = None
         self.food = None
         self.current_direction = None
         self.current_score = 0
 
     def update(self, snake, food):
-        self.snake_parts = snake.snake
+        self.snake = snake
         self.current_direction = snake.get_direction()
         self.current_score = snake.get_score()
         self.food = food
@@ -61,7 +62,8 @@ class Agent:
         if self.agent_type == AgentType.RANDOM:
             return self.random_action()
 
-        return self.ai_action()
+        fitness, action = self.ai_action(self.snake, depth=1)
+        return action
 
     def random_action(self):
         return random.choice(list(Action))
@@ -80,57 +82,79 @@ class Agent:
 
         return Action.NONE
 
-    def fitness_function(self, direction):
+    def check_collisions(self, direction, snake_parts):
+        new_head = snake_parts[-1] + direction
 
-        death_penalty = math.inf
-
-        # Unallowed action
         if np.array_equal(direction, -self.current_direction):
-            return death_penalty
+            return True
 
-        # The head of the snake after the action is taken
-        new_head = self.snake_parts[-1] + direction
-
-        # Hit wall
         if new_head[0] < 0 or new_head[0] >= self.width or new_head[1] < 0 or new_head[1] >= self.height:
-            return death_penalty
+            return True
 
-        # Hit self
-        if any((new_head == segment).all() for segment in self.snake_parts):
-            return death_penalty
+        if any((new_head == segment).all() for segment in snake_parts):
+            return True
 
-        # Hit food
+    def check_food(self, direction, snake_parts):
+        new_head = snake_parts[-1] + direction
+
         if new_head[0] == self.food[0] and new_head[1] == self.food[1]:
-            return 1
+            return True
 
+    def fitness_function(self, direction, snake):
+        death_penalty = 1000
+        food_reward = -1000
+        if self.check_collisions(direction, snake.snake):
+            return death_penalty
+
+        if self.check_food(direction, snake.snake):
+            return food_reward
+
+        new_head = snake.snake[-1] + direction
         # Calculate distance to food using manhattan distance
         distance_to_food = abs(
             new_head[0] - self.food[0]) + abs(new_head[1] - self.food[1])
 
-        # Calculate distance to wall using manhattan distance
-        distance_to_wall = min(
-            new_head[0], self.width - new_head[0], new_head[1], self.height - new_head[1])
-
-        # Calculate distance to self using manhattan distance
-        distance_to_self = min([abs(new_head[0] - segment[0]) + abs(
-            new_head[1] - segment[1]) for segment in self.snake_parts[:-1]]) if len(self.snake_parts) > 1 else 0
-
-        # Calculate angle to food
-        angle_to_food = math.atan2(
-            self.food[1] - new_head[1], self.food[0] - new_head[0])
-
         return distance_to_food
 
-    def ai_action(self):
+    def ai_action(self, snake, depth):
+        best_fitness_score = 1001
         best_action = Action.NONE
-        best_fitness = math.inf
 
-        for action in list(Action):
-            direction = self.get_direction_from_action(action)
-            fitness = self.fitness_function(direction)
+        for action in Action:
+            copy_snake = Snake(self.block_size, self.width, self.height)
+            copy_snake.snake = snake.snake.copy()
+            copy_snake.score = snake.score
+            copy_snake.direction = snake.direction
 
-            if fitness <= best_fitness:
-                best_fitness = fitness
+            new_direction = self.get_direction_from_action(action)
+
+            if depth == 0:
+                fitness_score = self.fitness_function(
+                    new_direction, copy_snake)
+            else:
+                if self.check_collisions(new_direction, copy_snake.snake):
+                    fitness_score = 1000
+                elif self.check_food(new_direction, copy_snake.snake):
+                    fitness_score = -1000
+                else:
+                    copy_snake.change_direction(new_direction)
+                    copy_snake.move()
+                    fitness_score, _ = self.ai_action(copy_snake, depth - 1)
+
+            if fitness_score < best_fitness_score:
+                best_fitness_score = fitness_score
                 best_action = action
 
-        return best_action
+        return best_fitness_score, best_action
+
+    def get_action_from_direction(self, direction):
+        if np.array_equal(direction, np.array([0, -self.block_size])):
+            return Action.UP
+        elif np.array_equal(direction, np.array([0, self.block_size])):
+            return Action.DOWN
+        elif np.array_equal(direction, np.array([-self.block_size, 0])):
+            return Action.LEFT
+        elif np.array_equal(direction, np.array([self.block_size, 0])):
+            return Action.RIGHT
+        else:
+            return Action.NONE
